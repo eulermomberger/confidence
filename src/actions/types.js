@@ -1,0 +1,17 @@
+export const MODIFICA_SENHA = 'modifica_senha';
+export const MODIFICA_USUARIO = 'modifica_usuario';
+export const CADASTRO_USUARIO_SUCESSO = 'cadastro_usuario_sucesso';
+export const CADASTRO_USUARIO_ERRO = 'cadastro_usuario_erro';
+export const LOGIN_USUARIO_SUCESSO = 'login_usuario_sucesso';
+export const LOGIN_USUARIO_ERRO = 'login_usuario_erro';
+export const LOGIN_EM_ANDAMENTO = 'login_em_andamento';
+export const CADASTRO_EM_ANDAMENTO = 'cadastro_em_andamento';
+export const MODIFICA_POST = 'modifica_post';
+export const LISTA_POSTS = 'lista_posts';
+export const PUBLICAR_SUCESSO = 'publicar_sucesso';
+export const MODIFICA_AVATAR = 'modifica_avatar';
+export const LOGOUT_USUARIO = 'logout_usuario';
+export const MODIFICA_MENSAGEM = 'modifica_mensagem';
+export const LISTA_CONVERSA = 'lista_conversa';
+export const ENVIA_MENSAGEM_SUCESSO = 'envia_mensagem_sucesso';
+export const LISTA_CONVERSAS = 'lista_conversas';
