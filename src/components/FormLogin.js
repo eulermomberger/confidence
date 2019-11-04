@@ -7,8 +7,7 @@ import {
     ImageBackground, 
     Text,
     StyleSheet,
-    ActivityIndicator,
-    YellowBox
+    ActivityIndicator
 } from 'react-native';
 import _ from 'lodash';
 import {Actions} from 'react-native-router-flux';
@@ -16,18 +15,6 @@ import { connect } from 'react-redux';
 import { modificaUsuario, modificaSenha, autenticarUsuario, modificaAvatar } from '../actions/AutenticacaoActions';
 
 class FormLogin extends Component {
-    constructor(props) {
-		super(props);
-		YellowBox.ignoreWarnings(['Setting a timer', 'componentWillReceiveProps', 'Possible Unhandled Promise Rejection']);
-		const _console = _.clone(console);
-		console.warn = message => {
-  			if (message.indexOf('Setting a timer') <= -1 || message.indexOf('componentWillReceiveProps') <= -1 || message.indexOf('Possible Unhandled Promise Rejection') <= -1) {
-    			_console.warn(message);
-  			}
-        };
-    }
-
-
     _autenticarUsuario() {
         const { usuario, senha } = this.props;
         this.props.modificaAvatar(usuario);
