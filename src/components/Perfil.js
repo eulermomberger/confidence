@@ -77,6 +77,7 @@ class Perfil extends Component {
                 <View style={styles.informacoes}>
                     <View style={styles.usuario}>
                         <Image source={{uri: this.props.avatar}} style={styles.imgInformacoes}/>
+                        {console.log(this.props.usuario)}
                         <Text style={styles.txtInformacoes}>{this.props.usuario}</Text>
                     </View>
                     <View style={styles.menu}>

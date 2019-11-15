@@ -96,6 +96,7 @@ const cadastroUsuarioErro = (erro, dispatch) => {
 export const autenticarUsuario = ({ usuario, senha }) => {
     this.usuario = usuario;
     this.senha = senha;
+    console.log(usuario);
     return dispatch => {
         dispatch({ type: LOGIN_EM_ANDAMENTO });
         firebase.auth().signInWithEmailAndPassword(`${usuario}@confidence.com`, senha)

@@ -13,12 +13,32 @@ import _ from 'lodash';
 import {Actions} from 'react-native-router-flux';
 import { connect } from 'react-redux';
 import { modificaUsuario, modificaSenha, autenticarUsuario, modificaAvatar } from '../actions/AutenticacaoActions';
+import AsyncStorage from '@react-native-community/async-storage';
 
 class FormLogin extends Component {
-    _autenticarUsuario() {
-        const { usuario, senha } = this.props;
-        this.props.modificaAvatar(usuario);
+    _autenticarUsuario = async () => {
+        this.props.modificaAvatar(this.props.usuario);
+        this.setUsuario();
+        this.setSenha();
+        const usuario = await AsyncStorage.getItem('@usuario');
+        const senha = await AsyncStorage.getItem('@senha');
         this.props.autenticarUsuario({ usuario, senha });
+    }
+
+    setUsuario = async () => {
+        try{
+            AsyncStorage.setItem('@usuario', this.props.usuario);
+        } catch(e){
+
+        }
+    }
+
+    setSenha = async () => {
+        try{
+            AsyncStorage.setItem('@senha', this.props.senha);
+        } catch(e){
+
+        }
     }
 
     renderBtnEntrar(){

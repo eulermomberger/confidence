@@ -18,13 +18,33 @@ import {
     cadastraUsuario,
     modificaAvatar
 } from '../actions/AutenticacaoActions';
+import AsyncStorage from '@react-native-community/async-storage';
 
 class formCadastro extends Component {
 
-    _cadastraUsuario() {
-        const { usuario, senha } = this.props;
+    _cadastraUsuario = async () => {
         const avatar = this.avatar;
+        this.setUsuario();
+        this.setSenha();
+        const usuario = await AsyncStorage.getItem('@usuario');
+        const senha = await AsyncStorage.getItem('@senha');
         this.props.cadastraUsuario({ usuario, senha, avatar });
+    }
+
+    setUsuario = async () => {
+        try{
+            AsyncStorage.setItem('@usuario', this.props.usuario);
+        } catch(e){
+
+        }
+    }
+
+    setSenha = async () => {
+        try{
+            AsyncStorage.setItem('@senha', this.props.senha);
+        } catch(e){
+
+        }
     }
     
     renderBtnCadastrar(){
