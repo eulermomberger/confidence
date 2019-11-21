@@ -15,3 +15,6 @@ export const MODIFICA_MENSAGEM = 'modifica_mensagem';
 export const LISTA_CONVERSA = 'lista_conversa';
 export const ENVIA_MENSAGEM_SUCESSO = 'envia_mensagem_sucesso';
 export const LISTA_CONVERSAS = 'lista_conversas';
+export const EXCLUIR_POST = 'excluir_post';
+export const DENUNCIAR = 'denunciar';
+export const LIKE = 'like';

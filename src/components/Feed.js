@@ -2,19 +2,21 @@ import React, { Component } from 'react';
 import {
   View,
   StyleSheet,
-  TouchableHighlight,
   Image,
-  FlatList,
+  SectionList,
+  TouchableHighlight,
+  Alert,
   Text,
   YellowBox
 } from 'react-native';
 import {connect} from 'react-redux';
 import _ from 'lodash';
 import { Actions } from 'react-native-router-flux';
+import Icon from 'react-native-vector-icons/AntDesign';
 
 import Topo from './Topo.js';
 import BarraNavegacao from './BarraNavegacao';
-import { postsFetch } from '../actions/AutenticacaoActions';
+import { postsFetch, like, denunciar, excluir } from '../actions/AutenticacaoActions';
 
 const imagem = require('../imgs/home.png');
 
@@ -30,8 +32,13 @@ class Feed extends Component {
 		};
 		this.props.postsFetch();
 		this.state={
-			data: null
+			data: null,
 		}
+		console.log(this.state.likes)
+	}
+
+	state={
+		likes: null
 	}
 
 	shouldComponentUpdate(prevProps) {
@@ -43,6 +50,53 @@ class Feed extends Component {
 			return false;
 	}
 
+	alert(uid) {
+		Alert.alert(
+            'Conteúdo Abusivo!',
+            'Deseja denunciar esta publicação?',
+            [ 
+                {text: 'SIM', onPress: () => this.props.denunciar(uid, this.props.usuario)}, 
+                {text:' CANCELAR '}, 
+            ]
+        )
+	}
+
+	renderOpcoes(item){
+		let denunciou = false;
+		if(item.usuario != this.props.usuario){
+			item.denunciaUser.forEach(element => {
+				if(element == this.props.usuario)
+					denunciou = true;
+			});
+			if(!denunciou) {
+				return(
+					<View style={styles.opcoes}>
+						<Icon onPress={() => {this.props.like(item.uid); this.setState({likes: item.uid})}} name={'hearto'} size={15} style={styles.icon}/>
+						<Text>{item.likes}</Text>
+						<Icon onPress={() => this.alert(item.uid)} name={'warning'} size={15} style={styles.icon}/>
+					</View>
+				);
+			} else{
+				return(
+					<View style={styles.opcoes}>
+						<Icon onPress={() => {this.props.like(item.uid); this.setState({likes: item.uid})}} name={'hearto'} size={15} style={styles.icon}/>
+						<Text>{item.likes}</Text>
+						<Icon onPress={() => false} name={'warning'} color={'#FFD700'} size={15} style={styles.icon}/>
+					</View>
+				);
+			}
+
+		} else {
+			return(
+				<View style={styles.opcoes}>
+					<Icon onPress={() => this.props.like(item.uid)} name={'hearto'} size={15} style={styles.icon}/>
+					<Text>{item.likes}</Text>
+					<Icon onPress={() => this.props.excluir(item.uid)} name={'delete'} size={15} style={styles.icon}/>
+				</View>
+			);
+		}
+	}
+
 	render() {
 		let array = _.orderBy(this.state.data, ['hora'], ['desc']);
 		return (
@@ -51,12 +105,12 @@ class Feed extends Component {
 					<Topo texto={' Página Inicial '} imagem={imagem} />
 				</View>
 				<View style={styles.publicacoes}>
-					<FlatList
-						data={array}
+					<SectionList
+						sections={[{data: array}]}
 						keyExtractor={item => item.uid}
-						renderItem={({item}) => {
-							return (
-								<View style={styles.lista}>
+						renderItem={({item}) => (
+							<View style={styles.lista}>
+								<View style={styles.viewPost}>
 									<View style={styles.viewAvatar}>
 										<Image source={{uri: item.avatar}} style={styles.avatar} />
 									</View>
@@ -65,8 +119,10 @@ class Feed extends Component {
 										<Text style={styles.post}>{item.post}</Text>
 									</View>
 								</View>
+								{this.renderOpcoes(item)}
+							</View>
 							)
-						}}
+						}
 					/>
 					<View style={styles.novoPost}>
 						<TouchableHighlight
@@ -86,17 +142,21 @@ class Feed extends Component {
 }
 
 const mapStateToProps = state => {
-    const posts = _.map(state.ListaPostsReducer, (val, uid) => {
+    const posts = _.mapValues(state.ListaPostsReducer, (val, uid) => {
         return {...val, uid};
 	});
 
     return ({
-		posts
+		posts,
+        usuario: state.AutenticacaoReducer.usuario
     });
 }
 
 export default connect(mapStateToProps, { 
-	postsFetch
+	postsFetch,
+	like,
+	excluir,
+	denunciar
 })(Feed)
 
 const styles = StyleSheet.create({
@@ -122,6 +182,8 @@ const styles = StyleSheet.create({
     	paddingVertical: 15,
         borderBottomWidth: 1,
 		borderColor: '#CCC',
+	},
+	viewPost: {
 		flexDirection: 'row'
 	},
 	nome: {
@@ -129,22 +191,26 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold'
 	},
 	post: {
-		fontSize: 14
-	},
-	like: {
-		height: 11,
-		width: 10,
-		paddingHorizontal: 7,
-		paddingVertical: 5
+		fontSize: 14,
+		lineHeight: 20
 	},
 	viewAvatar: {
 		paddingRight: 10
 	},
 	viewTexto: {
-		paddingRight: 30
+		paddingRight: 50
 	},
 	avatar: {
 		height:40, 
 		width:40
+	},
+	opcoes: {
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
+		marginTop: 5
+	},
+	icon: {
+		paddingLeft: 10
 	}
+	
 });

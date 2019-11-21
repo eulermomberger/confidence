@@ -55,7 +55,8 @@ const styles = StyleSheet.create({
         fontFamily: 'MV Boli'
     },
     btn: {
-        flex: 1
+        flex: 1,
+        alignItems: 'center'
     },
     btnComecar: {
         backgroundColor: '#FD7757',

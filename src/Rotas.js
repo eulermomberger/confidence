@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { Router, Scene } from 'react-native-router-flux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { modificaUsuario, autenticarUsuario, modificaAvatar } from './actions/AutenticacaoActions';
+import { modificaUsuario, autenticarUsuario, modificaAvatar, modificaSenha } from './actions/AutenticacaoActions';
 import {connect} from 'react-redux';
 
 import FormLogin from './components/FormLogin';
@@ -29,6 +29,7 @@ class Rotas extends Component{
 			const senha = await AsyncStorage.getItem('@senha')
 			if(usuario != null && senha != null) {
 				this.props.modificaUsuario(usuario);
+				this.props.modificaSenha(senha);
 				this.props.modificaAvatar(usuario);
 				logado = true;
 				this.props.autenticarUsuario({usuario, senha});
@@ -40,7 +41,6 @@ class Rotas extends Component{
 	
 	constructor (props) {
 		super(props);
-		console.log(props);
 		this.getData();
 	}
 
@@ -101,6 +101,7 @@ const mapStateToProps = state => (
 
 export default connect(mapStateToProps, { 
     modificaUsuario,
-    autenticarUsuario,
+	autenticarUsuario,
+	modificaSenha,
     modificaAvatar
 })(Rotas);

@@ -2,6 +2,7 @@ import firebase from 'firebase';
 import {Actions} from 'react-native-router-flux';
 import _ from 'lodash';
 import b64 from 'base-64';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import {
     MODIFICA_SENHA, 
@@ -20,7 +21,10 @@ import {
     ENVIA_MENSAGEM_SUCESSO,
     LISTA_CONVERSA,
     MODIFICA_MENSAGEM,
-    LISTA_CONVERSAS
+    LISTA_CONVERSAS,
+    EXCLUIR_POST,
+    DENUNCIAR,
+    LIKE
 } from './types';
 
 export const modificaSenha = texto => {
@@ -96,7 +100,6 @@ const cadastroUsuarioErro = (erro, dispatch) => {
 export const autenticarUsuario = ({ usuario, senha }) => {
     this.usuario = usuario;
     this.senha = senha;
-    console.log(usuario);
     return dispatch => {
         dispatch({ type: LOGIN_EM_ANDAMENTO });
         firebase.auth().signInWithEmailAndPassword(`${usuario}@confidence.com`, senha)
@@ -144,7 +147,7 @@ export const publicar = (post, avatar) => {
     let timestamp = new Date().getTime();
     return dispatch => {
         firebase.database().ref(`/posts`)
-            .push({ post, usuario: this.usuario, avatar, hora: timestamp })
+            .push({ post, usuario: this.usuario, avatar, hora: timestamp, likes: 0, denuncia: 0, denunciaUser: [""] })
             .then(() => dispatch ( { type: PUBLICAR_SUCESSO} ) )
     }
 }
@@ -153,6 +156,13 @@ export const postsFetch = () => {
     return dispatch => {
         firebase.database().ref('/posts')
             .on("value", snapshot => {
+                snapshot.forEach(element => {
+                    if(element.child("denuncia").val() != null) {
+                        if(element.child("denuncia").val() == 3){
+                            element.ref.remove()
+                        }
+                    }
+                })
                 dispatch({ type: LISTA_POSTS, payload: snapshot.val() })
             })
     }
@@ -161,6 +171,8 @@ export const postsFetch = () => {
 export const logoutUsuario = () => {
     return dispatch => {
         firebase.auth().signOut();
+        AsyncStorage.setItem('@usuario', null);
+        AsyncStorage.setItem('@senha', null);
         dispatch({ type: LOGOUT_USUARIO });
         Actions.formLogin();
     }
@@ -232,5 +244,48 @@ export const conversasFetch = () => {
         .on("value", snapshot => {
             dispatch({ type: LISTA_CONVERSAS, payload: snapshot.val() })
         })
+    }
+}
+
+export const like = uid => {
+    let like = 0;
+    return dispatch => {
+        let ref = firebase.database().ref(`/posts/${uid}`)
+        if(ref != null) {
+            ref.on("value", snapshot => {
+                if(snapshot.val() != null)
+                    like = snapshot.val().likes;
+            })
+            ref.update({likes: ++like})
+        }
+        dispatch({ type: LIKE })
+    }
+}
+
+export const excluir = uid => {
+    return dispatch => {
+        firebase.database().ref(`/posts/${uid}`).remove();
+        dispatch({ type: EXCLUIR_POST})
+    }
+}
+
+export const denunciar = (uid, usuario) => {
+    let denuncia = 0;
+    let usuarios = null;
+    return dispatch => {
+        let ref = firebase.database().ref(`/posts/${uid}`)
+        if(ref != null) {
+            ref.on("value", snapshot => {
+                if(snapshot.val() != null) {
+                    denuncia = snapshot.val().denuncia;
+                    usuarios = snapshot.val().denunciaUser;
+                }
+            })
+            if(usuarios != null)
+                ref.update({denunciaUser: [...usuarios,usuario]})
+            if(denuncia != null)
+                ref.update({denuncia: ++denuncia})
+        }
+        dispatch({type: DENUNCIAR})
     }
 }
