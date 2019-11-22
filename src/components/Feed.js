@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 
 import Topo from './Topo.js';
 import BarraNavegacao from './BarraNavegacao';
-import { postsFetch, like, denunciar, excluir } from '../actions/AutenticacaoActions';
+import { postsFetch, like, denunciar, excluir, retirarLike } from '../actions/AutenticacaoActions';
 
 const imagem = require('../imgs/home.png');
 
@@ -34,7 +34,6 @@ class Feed extends Component {
 		this.state={
 			data: null,
 		}
-		console.log(this.state.likes)
 	}
 
 	state={
@@ -61,25 +60,57 @@ class Feed extends Component {
         )
 	}
 
+	excluir(uid) {
+		Alert.alert(
+			'Excluir Publicação!',
+			'Deseja mesmo excluir esta publicação?',
+			[
+				{text: 'SIM', onPress: () => this.props.excluir(uid)}, 
+                {text:' CANCELAR '},
+			]
+		)
+	}
+
 	renderOpcoes(item){
 		let denunciou = false;
+		let like = false;
+		item.likeUser.forEach(element => {
+			if(element == this.props.usuario)
+				like = true;
+		});
 		if(item.usuario != this.props.usuario){
 			item.denunciaUser.forEach(element => {
 				if(element == this.props.usuario)
 					denunciou = true;
 			});
-			if(!denunciou) {
+			if(!denunciou && !like) {
 				return(
 					<View style={styles.opcoes}>
-						<Icon onPress={() => {this.props.like(item.uid); this.setState({likes: item.uid})}} name={'hearto'} size={15} style={styles.icon}/>
+						<Icon onPress={() => {this.props.like(item.uid, this.props.usuario); this.setState({likes: item.uid})}} name={'hearto'} size={15} style={styles.icon}/>
 						<Text>{item.likes}</Text>
 						<Icon onPress={() => this.alert(item.uid)} name={'warning'} size={15} style={styles.icon}/>
 					</View>
 				);
-			} else{
+			} else if(!denunciou && like){
 				return(
 					<View style={styles.opcoes}>
-						<Icon onPress={() => {this.props.like(item.uid); this.setState({likes: item.uid})}} name={'hearto'} size={15} style={styles.icon}/>
+						<Icon onPress={() => {this.props.retirarLike(item.uid, this.props.usuario); this.setState({likes: item.uid})}} name={'heart'}  color={'#B22222'} size={15} style={styles.icon}/>
+						<Text>{item.likes}</Text>
+						<Icon onPress={() => this.alert(item.uid)} name={'warning'} size={15} style={styles.icon}/>
+					</View>
+				);
+			} else if(denunciou && !like){
+				return(
+					<View style={styles.opcoes}>
+						<Icon onPress={() => {this.props.like(item.uid, this.props.usuario); this.setState({likes: item.uid})}} name={'hearto'} size={15} style={styles.icon}/>
+						<Text>{item.likes}</Text>
+						<Icon onPress={() => false} name={'warning'} color={'#FFD700'} size={15} style={styles.icon}/>
+					</View>
+				);
+			} else if(denunciou && like){
+				return(
+					<View style={styles.opcoes}>
+						<Icon onPress={() => {this.props.retirarLike(item.uid, this.props.usuario); this.setState({likes: item.uid})}} name={'heart'}  color={'#B22222'} size={15} style={styles.icon}/>
 						<Text>{item.likes}</Text>
 						<Icon onPress={() => false} name={'warning'} color={'#FFD700'} size={15} style={styles.icon}/>
 					</View>
@@ -87,13 +118,23 @@ class Feed extends Component {
 			}
 
 		} else {
-			return(
-				<View style={styles.opcoes}>
-					<Icon onPress={() => this.props.like(item.uid)} name={'hearto'} size={15} style={styles.icon}/>
-					<Text>{item.likes}</Text>
-					<Icon onPress={() => this.props.excluir(item.uid)} name={'delete'} size={15} style={styles.icon}/>
-				</View>
-			);
+			if(!like) {
+				return(
+					<View style={styles.opcoes}>
+						<Icon onPress={() => this.props.like(item.uid, this.props.usuario)} name={'hearto'} size={15} style={styles.icon}/>
+						<Text>{item.likes}</Text>
+						<Icon onPress={() => this.excluir(item.uid)} name={'delete'} size={15} style={styles.icon}/>
+					</View>
+				);
+			} else {
+				return(
+					<View style={styles.opcoes}>
+						<Icon onPress={() => this.props.retirarLike(item.uid, this.props.usuario)} name={'heart'} color={'#B22222'} size={15} style={styles.icon}/>
+						<Text>{item.likes}</Text>
+						<Icon onPress={() => this.excluir(item.uid)} name={'delete'} size={15} style={styles.icon}/>
+					</View>
+				);
+			}
 		}
 	}
 
@@ -156,7 +197,8 @@ export default connect(mapStateToProps, {
 	postsFetch,
 	like,
 	excluir,
-	denunciar
+	denunciar,
+	retirarLike
 })(Feed)
 
 const styles = StyleSheet.create({

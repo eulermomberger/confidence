@@ -27,7 +27,7 @@ class Rotas extends Component{
 		try {
 			const usuario = await AsyncStorage.getItem('@usuario')
 			const senha = await AsyncStorage.getItem('@senha')
-			if(usuario != null && senha != null) {
+			if(usuario != null && senha != null  && usuario != "" && senha != "") {
 				this.props.modificaUsuario(usuario);
 				this.props.modificaSenha(senha);
 				this.props.modificaAvatar(usuario);
@@ -49,14 +49,14 @@ class Rotas extends Component{
 			return (
 				<Router>
 					<Scene key='root'>
+						<Scene key='feed' initial component={Feed} hideNavBar />
 						<Scene key='principal' component={Principal} hideNavBar/>
 						<Scene key='inicializacao' component={Inicializacao} hideNavBar/>
 						<Scene key='introducaoI' component={IntroducaoI} hideNavBar/>
 						<Scene key='introducaoII' component={IntroducaoII} hideNavBar/>
-						<Scene key='formLogin' initial component={FormLogin} hideNavBar/>
+						<Scene key='formLogin' component={FormLogin} hideNavBar/>
 						<Scene key='formCadastro' component={FormCadastro} hideNavBar/>
 						<Scene key='listaAvatares'component={ListaAvatares} hideNavBar />
-						<Scene key='feed' component={Feed} hideNavBar />
 						<Scene key='boasVindas' component={BoasVindas} hideNavBar />
 						<Scene key='perfil' component={Perfil} hideNavBar />
 						<Scene key='notificacoes' component={Notificacoes} hideNavBar />
@@ -71,6 +71,7 @@ class Rotas extends Component{
 			return (
 				<Router>
 					<Scene key='root'>
+						<Scene key='feed' component={Feed} hideNavBar />
 						<Scene key='principal' initial component={Principal} hideNavBar/>
 						<Scene key='inicializacao' component={Inicializacao} hideNavBar/>
 						<Scene key='introducaoI' component={IntroducaoI} hideNavBar/>
@@ -78,7 +79,6 @@ class Rotas extends Component{
 						<Scene key='formLogin' component={FormLogin} hideNavBar/>
 						<Scene key='formCadastro' component={FormCadastro} hideNavBar/>
 						<Scene key='listaAvatares'component={ListaAvatares} hideNavBar />
-						<Scene key='feed' component={Feed} hideNavBar />
 						<Scene key='boasVindas' component={BoasVindas} hideNavBar />
 						<Scene key='perfil' component={Perfil} hideNavBar />
 						<Scene key='notificacoes' component={Notificacoes} hideNavBar />

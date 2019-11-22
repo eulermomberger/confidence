@@ -4,17 +4,18 @@ import {
     StyleSheet,
     Text,
     YellowBox,
-    FlatList,
+    SectionList,
     Image,
     Alert
 } from 'react-native';
 import {connect} from 'react-redux';
 import _ from 'lodash';
 import Menu, { MenuItem } from 'react-native-material-menu';
+import Icon from 'react-native-vector-icons/AntDesign';
 
 import Topo from './Topo.js';
 import BarraNavegacao from './BarraNavegacao';
-import { postsFetch, logoutUsuario } from '../actions/AutenticacaoActions';
+import { postsFetch, logoutUsuario, like, retirarLike, excluir } from '../actions/AutenticacaoActions';
 
 const imagem = require('../imgs/perfil.png');
 
@@ -67,6 +68,62 @@ class Perfil extends Component {
         ); 
     }
 
+    lista = item => {
+        if(item.usuario == this.props.usuario) {
+            return (
+                <View style={styles.viewPost}>
+                    <View style={styles.viewAvatar}>
+                        <Image source={{uri: item.avatar}} style={styles.avatar} />
+                    </View>
+                    <View style={styles.viewTexto}>
+                        <Text style={styles.nome}>{item.usuario}</Text>
+                        <Text style={styles.post}>{item.post}</Text>
+                    </View>
+                </View>
+            )
+        } else {
+            return false;
+        }
+    }
+
+    excluir(uid) {
+		Alert.alert(
+			'Excluir Publicação!',
+			'Deseja mesmo excluir esta publicação?',
+			[
+				{text: 'SIM', onPress: () => this.props.excluir(uid)}, 
+                {text:' CANCELAR '},
+			]
+		)
+	}
+
+    renderOpcoes = item => {
+        let like = false;
+		item.likeUser.forEach(element => {
+			if(element == this.props.usuario)
+				like = true;
+        });
+        if(item.usuario == this.props.usuario) {
+            if(!like) {
+                return(
+                    <View style={styles.opcoes}>
+                        <Icon onPress={() => this.props.like(item.uid, this.props.usuario)} name={'hearto'} size={15} style={styles.icon}/>
+                        <Text>{item.likes}</Text>
+                        <Icon onPress={() => this.excluir(item.uid)} name={'delete'} size={15} style={styles.icon}/>
+                    </View>
+                );
+            } else {
+                return(
+                    <View style={styles.opcoes}>
+                        <Icon onPress={() => this.props.retirarLike(item.uid, this.props.usuario)} name={'heart'} color={'#B22222'} size={15} style={styles.icon}/>
+                        <Text>{item.likes}</Text>
+                        <Icon onPress={() => this.excluir(item.uid)} name={'delete'} size={15} style={styles.icon}/>
+                    </View>
+                );
+            }
+        }
+    }
+
     render() {
         let array = _.orderBy(this.state.data, ['hora'], ['desc']);
         return (
@@ -89,28 +146,17 @@ class Perfil extends Component {
                     </View>
                 </View>
                 <View style={styles.publicacoes}>
-                    <FlatList
-                        data={array}
-                        keyExtractor={item => item.uid}
-                        renderItem={({item}) => {
-                            if(item.usuario === this.props.usuario) {
-                                return (
-                                    <View style={styles.lista}>
-                                        <View style={styles.viewAvatar}>
-										    <Image source={{uri: item.avatar}} style={styles.avatar} />
-									    </View>
-									    <View style={styles.viewTexto}>
-    										<Text style={styles.nome}>{item.usuario}</Text>
-	    									<Text style={styles.post}>{item.post}</Text>
-		    							</View>
-                                    </View>
-                                )
-                            }
-                            else{
-                                return false;
-                            }
-                        }}
-                    />
+                    <SectionList
+						sections={[{data: array}]}
+						keyExtractor={item => item.uid}
+						renderItem={({item}) => (
+							<View style={styles.lista}>
+                                {this.lista(item)}
+								{this.renderOpcoes(item)}
+							</View>
+							)
+						}
+					/>
                 </View>
                 <View>
                     <BarraNavegacao />
@@ -132,36 +178,12 @@ const mapStateToProps = state => {
     });
 }
 
-export default connect(mapStateToProps, { postsFetch, logoutUsuario })(Perfil)
+export default connect(mapStateToProps, { postsFetch, logoutUsuario, like, retirarLike, excluir })(Perfil)
 
 const styles = StyleSheet.create({
     perfil: {
         flex: 1
     },
-    lista: {
-        flex: 1,
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderColor: '#CCC',
-		flexDirection: 'row'
-    },
-    nome: {
-        fontSize: 16,
-        fontWeight: 'bold'
-    },
-    post: {
-        fontSize: 14
-    },
-    publicacoes: {
-        flex: 5
-    },
-    viewAvatar: {
-		paddingRight: 10
-	},
-	viewTexto: {
-		paddingRight: 30
-	},
 	avatar: {
 		height:40, 
 		width:40
@@ -187,5 +209,45 @@ const styles = StyleSheet.create({
     },
     usuario: {
         flexDirection: 'row'
-    }
+    },
+    publicacoes: {
+		flex: 1,
+		flexDirection: 'row',
+		justifyContent: 'flex-end'
+	},
+    lista: {
+        paddingHorizontal: 15,
+    	paddingVertical: 15,
+        borderBottomWidth: 1,
+		borderColor: '#CCC',
+	},
+	viewPost: {
+		flexDirection: 'row'
+	},
+	nome: {
+		fontSize: 18,
+		fontWeight: 'bold'
+	},
+	post: {
+		fontSize: 14,
+		lineHeight: 20
+	},
+	viewAvatar: {
+		paddingRight: 10
+	},
+	viewTexto: {
+		paddingRight: 50
+	},
+	avatar: {
+		height:40, 
+		width:40
+	},
+	opcoes: {
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
+		marginTop: 5
+	},
+	icon: {
+		paddingLeft: 10
+	}
 });

@@ -147,7 +147,7 @@ export const publicar = (post, avatar) => {
     let timestamp = new Date().getTime();
     return dispatch => {
         firebase.database().ref(`/posts`)
-            .push({ post, usuario: this.usuario, avatar, hora: timestamp, likes: 0, denuncia: 0, denunciaUser: [""] })
+            .push({ post, usuario: this.usuario, avatar, hora: timestamp, likes: 0, denuncia: 0, denunciaUser: [""], likeUser: [""] })
             .then(() => dispatch ( { type: PUBLICAR_SUCESSO} ) )
     }
 }
@@ -171,8 +171,8 @@ export const postsFetch = () => {
 export const logoutUsuario = () => {
     return dispatch => {
         firebase.auth().signOut();
-        AsyncStorage.setItem('@usuario', null);
-        AsyncStorage.setItem('@senha', null);
+        AsyncStorage.setItem('@usuario', "");
+        AsyncStorage.setItem('@senha', "");
         dispatch({ type: LOGOUT_USUARIO });
         Actions.formLogin();
     }
@@ -247,18 +247,49 @@ export const conversasFetch = () => {
     }
 }
 
-export const like = uid => {
+export const like = (uid, usuario) => {
     let like = 0;
+    let usuarios = null;
     return dispatch => {
         let ref = firebase.database().ref(`/posts/${uid}`)
         if(ref != null) {
             ref.on("value", snapshot => {
-                if(snapshot.val() != null)
+                if(snapshot.val() != null) {
                     like = snapshot.val().likes;
+                    usuarios = snapshot.val().likeUser;
+                }
             })
-            ref.update({likes: ++like})
+            if(usuarios != null)
+                ref.update({likeUser: [...usuarios,usuario]})
+            if(like != null)
+                ref.update({likes: ++like})
         }
         dispatch({ type: LIKE })
+    }
+}
+
+export const retirarLike = (uid, usuario) => {
+    let like = 0;
+    let usuarios = null;
+    return dispatch => {
+        let ref = firebase.database().ref(`/posts/${uid}`)
+        if(ref != null) {
+            ref.on("value", snapshot => {
+                if(snapshot.val() != null) {
+                    like = snapshot.val().likes;
+                    usuarios = snapshot.val().likeUser;
+                    snapshot.val().likeUser.forEach(element => {
+                        if(element == usuario){
+                            var index = usuarios.indexOf(usuario);
+                            usuarios.splice(index, 1);
+                            ref.update({likeUser: [...usuarios]})
+                        }
+                    });
+                }
+            })
+            if(like != null)
+                ref.update({likes: --like})
+        }
     }
 }
 
