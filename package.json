@@ -18,7 +18,7 @@
     "@react-native-community/async-storage": "github:react-native-community/async-storage",
     "base-64": "^0.1.0",
     "firebase": "^6.4.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "react": "16.9.0",
     "react-native": "0.61.2",
     "react-native-gesture-handler": "^1.5.0",
